@@ -27,7 +27,7 @@ class YOLOWorld:
     def __call__(self, image, class_embeddings):
         return self.detect_objects(image, class_embeddings)
 
-    def detect_objects(self, image, class_embeddings):
+    def detect_objects(self, image, class_embeddings: np.ndarray):
 
         if class_embeddings.shape[1] != self.num_classes:
             raise ValueError(f"Number of classes in the class embeddings should be {self.num_classes}")
@@ -54,10 +54,15 @@ class YOLOWorld:
 
         return input_tensor
 
-    def inference(self, input_tensor, class_embeddings):
+    def inference(self, input_tensor, class_embeddings: np.ndarray):
         start = time.perf_counter()
-        outputs = self.session.run(self.output_names,
-                                   {self.input_names[0]: input_tensor, self.input_names[1]: class_embeddings})
+        outputs = self.session.run(
+            self.output_names,
+            {
+                self.input_names[0]: input_tensor,
+                self.input_names[1]: class_embeddings.astype(input_tensor.dtype)
+             }
+        )
 
         # print(f"Inference time: {(time.perf_counter() - start) * 1000:.2f} ms")
         return outputs
